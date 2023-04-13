@@ -39,7 +39,7 @@ echo -e "#${BLUE}                                                               
 echo -e "#${BLUE2}           ${BOLD}Auto${BLUE2}mated ${BOLD}S${BLUE2}can ${BOLD}P${BLUE2}arse ${BOLD}E${BLUE2}numerate ${BOLD}E${BLUE2}xploit ${BOLD}D${BLUE2}ata Collection ${RED}           #"
 echo -e "#${BLUE2}                              Script Version 0.1 ${RED}                            #"
 echo -e "#${BLUE}                                                                            ${RED} #"
-echo -e "#${BLUE2}                         by Chris McMahon and Kyle Hoehn                    ${RED} #"
+echo -e "#${BLUE2}                by Chris McMahon with contributions from Kyle Hoehn         ${RED} #"
 echo -e "#${BLUE}                                                                            ${RED} #"
 echo -e "###############################################################################"
 echo -e "${RESET}"
@@ -194,7 +194,7 @@ if [ -f "$tempfile" ]; then
 fi
 
 
-# parsing script
+# parsing script (https://github.com/actuated/nmap-grep/blob/master/nmap-grep.sh)
 
 sleep 2
 
@@ -421,4 +421,28 @@ else
     echo -e "[${RED}!${RESET}] $smbhosts does not exist. Skipping SMB enumeration.\n"
 fi
 
+# make directory structure
+
+rdpdir=./rdp
+echo -e "[${BLUE}*${RESET}] Creating 'rdp' directory..."
+
+if [ -d "$rpddir" ];
+then
+    echo -e "[${RED}!${RESET}] Directory 'rdp' already exists. Skipping.\n"
+else
+  mkdir ./rdp
+  echo -e "[${BLUE}*${RESET}] Directory 'rdp' created successfully. Continuing.\n"
+fi
+
+# file check and msfconsole rdp scanner
+
+echo -e "[${BLUE}*${RESET}] Running MSF RDP Check...\n"
+rdphosts=${varOutPath}rdp-hosts.txt
+if [ -f "$rdphosts" ]; then
+    msfconsole -x "use auxiliary/scanner/rdp/rdp_scanner; set RHOSTS file:${rdphosts}; run; exit"
+    cat ./smb/no_signing.out | cut -d ' ' -f 10 > ./smb/no_signing_hosts.txt
+    echo -e "\n[${BLUE}*${RESET}] MSF RDP check completed. Check rdp directory for results.\n"
+else 
+    echo -e "[${RED}!${RESET}] $rdphosts does not exist. Skipping RDP enumeration.\n"
+fi
 
