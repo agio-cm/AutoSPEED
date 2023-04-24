@@ -412,16 +412,21 @@ echo -e "[${BLUE}*${RESET}] Running Crackmapexec...\n"
 smbhosts=${varOutPath}smb-hosts.txt
 if [ -f "$smbhosts" ]; then
     crackmapexec smb ${varOutPath}smb-hosts.txt | tee ./smb/cme.out
-    cat cme.out | grep "signing:False" > ./smb/no_signing.out
-    cat cme.out | grep "SMBv1:True" > ./smb/smbv1.out
+    cat ./smb/cme.out | grep -a "signing:False" > ./smb/no_signing.out
+    cat ./smb/cme.out | grep -a "SMBv1:True" > ./smb/smbv1.out
     cat ./smb/no_signing.out | cut -d ' ' -f 10 > ./smb/no_signing_hosts.txt
     cat ./smb/smbv1.out | cut -d ' ' -f 10 > ./smb/smbv1_hosts.txt
-    echo -e "\n[${BLUE}*${RESET}] Crackmapexec completed. Check smb directory for results.\n"
+    numSigning=$(cat ./smb/no_signing_hosts.txt| wc -l)
+    numSMBV1=$(cat ./smb/smbv1_hosts.txt | wc -l)
+    echo -e "\n[${BLUE}*${RESET}] Hosts without SMB signing: ${numSigning}"
+    echo -e "[${BLUE}*${RESET}] SMBv1 hosts detected: ${numSMBV1}\n"
+    sleep 2
+    echo -e "\n[${BLUE}*${RESET}] Crackmapexec completed.\n"
 else 
     echo -e "[${RED}!${RESET}] $smbhosts does not exist. Skipping SMB enumeration.\n"
 fi
 
-# make directory structure
+# make rdp directory
 
 rdpdir=./rdp
 echo -e "[${BLUE}*${RESET}] Creating 'rdp' directory..."
