@@ -131,16 +131,12 @@ fi
 
 # make directory structure
 
-scandir=./scans
-echo -e "[${BLUE}*${RESET}] Creating 'scans' directory..."
+echo -e "[${BLUE}*${RESET}] Creating directory structure..."
 
-if [ -d "$scandir" ];
-then
-    echo -e "[${RED}!${RESET}] Directory 'scans' already exists. Skipping.\n"
-else
-  mkdir ./scans
+  mkdir ./${clientcode}
+  mkdir ./${clientcode}/scans
   echo -e "[${BLUE}*${RESET}] Directory 'scans' created successfully. Continuing.\n"
-fi
+
 
 sleep 2
 
@@ -149,39 +145,39 @@ sleep 2
 
 if [[ "$scantype" == "all" ]]; then
         echo -e "[${BLUE}*${RESET}] Starting full port TCP nmap scan...\n"
-        tcpscanoutput="./scans/${clientcode}_tcp_fullport"
-        tcpgreppable="./scans/${clientcode}_tcp_fullport.gnmap"
+        tcpscanoutput="./${clientcode}/scans/${clientcode}_tcp_fullport"
+        tcpgreppable="./${clientcode}/scans/${clientcode}_tcp_fullport.gnmap"
         nmap -iL $targetfile -p- --max-retries=2 --stats-every=2m --excludefile ${exclusions} -oA ${tcpscanoutput}
         echo -e "\n[${BLUE}*${RESET}] Full port TCP nmap completed!\n"
         
         echo -e "[${BLUE}*${RESET}] Starting UDP top 100 port nmap scan...\n"
-        udpscanoutput="./scans/${clientcode}_udp_top100"
-        udpgreppable="./scans/${clientcode}_udp_top100.gnmap"
+        udpscanoutput="./${clientcode}/scans/${clientcode}_udp_top100"
+        udpgreppable="./${clientcode}/scans/${clientcode}_udp_top100.gnmap"
         nmap -iL $targetfile -sU --top-ports 100 --max-retries=2 --excludefile ${exclusions} --stats-every=2m -oA ${udpscanoutput}
         echo -e "\n[${BLUE}*${RESET}] UDP top 100 ports nmap scan completed!\n"
         
         echo -e "[${BLUE}*${RESET}] Starting egress scans...\n"
-        nmap -Pn -p- allports.exposed -oA ./scans/${clientcode}_egress_fullport
-        nmap -Pn -p1-40 allports.exposed -oN ./scans/${clientcode}_egress_1-40
-        nmap -Pn -p41-80 allports.exposed -oN ./scans/${clientcode}_egress_41-80
-        nmap -Pn -p81-120 allports.exposed -oN ./scans/${clientcode}_egress_81-120
+        nmap -Pn -p- allports.exposed -oA ./${clientcode}/scans/${clientcode}_egress_fullport
+        nmap -Pn -p1-40 allports.exposed -oN ./${clientcode}/scans/${clientcode}_egress_1-40
+        nmap -Pn -p41-80 allports.exposed -oN ./${clientcode}/scans/${clientcode}_egress_41-80
+        nmap -Pn -p81-120 allports.exposed -oN ./${clientcode}/scans/${clientcode}_egress_81-120
         echo -e "\n[${BLUE}*${RESET}] Egress scans completed! \n"
 fi
 
 if [[ "$scantype" == "top1000" ]]; then
         echo -e "[${BLUE}*${RESET}] Starting top 1000 TCP nmap scan...\n"
-        tcpscanoutput="./scans/${clientcode}_tcp_top1000"
-        tcpgreppable="./scans/${clientcode}_tcp_top1000.gnmap"
+        tcpscanoutput="./${clientcode}/scans/${clientcode}_tcp_top1000"
+        tcpgreppable="./${clientcode}/scans/${clientcode}_tcp_top1000.gnmap"
         nmap -iL $targetfile --top-ports 1000 --max-retries=2 --stats-every=2m --excludefile ${exclusions} -oA ${tcpscanoutput}
         echo -e "\n[${BLUE}*${RESET}] TCP top 1000 ports nmap scan completed!\n"
 fi
 
 if [[ "$scantype" == "egress" ]]; then
         echo -e "[${BLUE}*${RESET}] Starting egress scans only...\n"
-        nmap -Pn -p- allports.exposed -oA ./scans/${clientcode}_egress_fullport
-        nmap -Pn -p1-40 allports.exposed -oN ./scans/${clientcode}_egress_1-40
-        nmap -Pn -p41-80 allports.exposed -oN ./scans/${clientcode}_egress_41-80
-        nmap -Pn -p81-120 allports.exposed -oN ./scans/${clientcode}_egress_81-120
+        nmap -Pn -p- allports.exposed -oA ./${clientcode}/scans/${clientcode}_egress_fullport
+        nmap -Pn -p1-40 allports.exposed -oN ./${clientcode}/scans/${clientcode}_egress_1-40
+        nmap -Pn -p41-80 allports.exposed -oN ./${clientcode}/scans/${clientcode}_egress_41-80
+        nmap -Pn -p81-120 allports.exposed -oN ./${clientcode}/scans/${clientcode}_egress_81-120
         echo -e "\n[${BLUE}*${RESET}] Egress scans completed! \n"
         exit 0
 fi
@@ -211,8 +207,9 @@ varDoSmbUrl="Y"
 varDoLiveHosts="Y"
 varInFile=$tcpgreppable
 varChangeOutDir="Y"
-varCustomOut="./scans/${clientcode}_parsed"
+varCustomOut="./${clientcode}/scans/${clientcode}_parsed"
 varOutPath="${varCustomOut}/"
+varWorkingDir="$(pwd)"
 
 echo -e "[${BLUE}*${RESET}] Parsing nmap output "
 echo -e "    File: ${tcpgreppable}"
@@ -376,7 +373,7 @@ rm $varOutPath$varTempFile
 # grep UDP for ipmi hosts
 
 if [ -f "$udpgreppable" ]; then
-  cat ${udpgreppable} | grep "623/open/udp" | cut -d ' ' -f 2 > ./scans/ipmi_hosts.txt
+  cat ${udpgreppable} | grep "623/open/udp" | cut -d ' ' -f 2 > ./${clientcode}/scans/ipmi_hosts.txt
 fi
 
 
@@ -393,14 +390,14 @@ echo -e "[${BLUE}*${RESET}] Starting SMB Enumeration!\n"
 # make directory structure
 sleep 2
 
-smbdir=./smb
+smbdir=./${clientcode}/smb
 echo -e "[${BLUE}*${RESET}] Creating 'smb' directory..."
 
 if [ -d "$smbdir" ];
 then
     echo -e "[${RED}!${RESET}] Directory 'smb' already exists. Skipping.\n"
 else
-  mkdir ./smb
+  mkdir ./${clientcode}/smb
   echo -e "[${BLUE}*${RESET}] Directory 'smb' created successfully. Continuing.\n"
 fi
 
@@ -411,31 +408,26 @@ sleep 2
 echo -e "[${BLUE}*${RESET}] Running Crackmapexec...\n"
 smbhosts=${varOutPath}smb-hosts.txt
 if [ -f "$smbhosts" ]; then
-    crackmapexec smb ${varOutPath}smb-hosts.txt | tee ./smb/cme.out
-    cat ./smb/cme.out | grep -a "signing:False" > ./smb/no_signing.out
-    cat ./smb/cme.out | grep -a "SMBv1:True" > ./smb/smbv1.out
-    cat ./smb/no_signing.out | cut -d ' ' -f 10 > ./smb/no_signing_hosts.txt
-    cat ./smb/smbv1.out | cut -d ' ' -f 10 > ./smb/smbv1_hosts.txt
-    numSigning=$(cat ./smb/no_signing_hosts.txt| wc -l)
-    numSMBV1=$(cat ./smb/smbv1_hosts.txt | wc -l)
-    echo -e "\n[${BLUE}*${RESET}] Hosts without SMB signing: ${numSigning}"
-    echo -e "[${BLUE}*${RESET}] SMBv1 hosts detected: ${numSMBV1}\n"
-    sleep 2
-    echo -e "\n[${BLUE}*${RESET}] Crackmapexec completed.\n"
+    crackmapexec smb ${varOutPath}smb-hosts.txt | tee ./${clientcode}/smb/cme.out
+    cat ./${clientcode}/smb/cme.out | grep "signing:False" > ./${clientcode}/smb/no_signing.out
+    cat ./${clientcode}/smb/cme.out | grep "SMBv1:True" > ./${clientcode}/smb/smbv1.out
+    cat ./${clientcode}/smb/no_signing.out | cut -d ' ' -f 10 > ./${clientcode}/smb/no_signing_hosts.txt
+    cat ./${clientcode}/smb/smbv1.out | cut -d ' ' -f 10 > ./${clientcode}/smb/smbv1_hosts.txt
+    numSigning=$(cat ./${clientcode}/smb/no_signing_hosts.txt| wc -l)
 else 
     echo -e "[${RED}!${RESET}] $smbhosts does not exist. Skipping SMB enumeration.\n"
 fi
 
-# make rdp directory
+# make directory structure
 
-rdpdir=./rdp
+rdpdir=./${clientcode}/rdp
 echo -e "[${BLUE}*${RESET}] Creating 'rdp' directory..."
 
 if [ -d "$rpddir" ];
 then
     echo -e "[${RED}!${RESET}] Directory 'rdp' already exists. Skipping.\n"
 else
-  mkdir ./rdp
+  mkdir ./${clientcode}/rdp
   echo -e "[${BLUE}*${RESET}] Directory 'rdp' created successfully. Continuing.\n"
 fi
 
@@ -444,8 +436,9 @@ fi
 echo -e "[${BLUE}*${RESET}] Running MSF RDP Check...\n"
 rdphosts=${varOutPath}rdp-hosts.txt
 if [ -f "$rdphosts" ]; then
-    msfconsole -x "use auxiliary/scanner/rdp/rdp_scanner; set RHOSTS file:${rdphosts}; run; exit"
-    cat ./smb/no_signing.out | cut -d ' ' -f 10 > ./smb/no_signing_hosts.txt
+    msfconsole -x "use auxiliary/scanner/rdp/rdp_scanner; set RHOSTS file:${varWorkingDir}/${clientcode}/scans/${clientcode}_parsed/rdp-hosts.txt; spool ${workingdir}/${clientcode}/rdp/rdp_scan.out; run; exit"
+    cat ./${clientcode}/rdp/rdp_scan.out | grep -a "NLA: Off" > ./${clientcode}/rdp/rdp_nla.out
+    cat ./${clientcode}/rdp/rdp_nla.out | cut -d ' ' -f 2 | cut -d ':' -f 1 > ./${clientcode}/rdp/nla_hosts.txt
     echo -e "\n[${BLUE}*${RESET}] MSF RDP check completed. Check rdp directory for results.\n"
 else 
     echo -e "[${RED}!${RESET}] $rdphosts does not exist. Skipping RDP enumeration.\n"
