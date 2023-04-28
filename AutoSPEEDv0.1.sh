@@ -135,7 +135,8 @@ echo -e "[${BLUE}*${RESET}] Creating directory structure..."
 
   mkdir ./${clientcode}
   mkdir ./${clientcode}/scans
-  echo -e "[${BLUE}*${RESET}] Directory 'scans' created successfully. Continuing.\n"
+  mkdir ./${clientcode}/other
+  echo -e "[${BLUE}*${RESET}] Directory structure created successfully. Continuing.\n"
 
 
 sleep 2
@@ -418,29 +419,15 @@ else
     echo -e "[${RED}!${RESET}] $smbhosts does not exist. Skipping SMB enumeration.\n"
 fi
 
-# make directory structure
-
-rdpdir=./${clientcode}/rdp
-echo -e "[${BLUE}*${RESET}] Creating 'rdp' directory..."
-
-if [ -d "$rpddir" ];
-then
-    echo -e "[${RED}!${RESET}] Directory 'rdp' already exists. Skipping.\n"
-else
-  mkdir ./${clientcode}/rdp
-  echo -e "[${BLUE}*${RESET}] Directory 'rdp' created successfully. Continuing.\n"
-fi
-
 # file check and msfconsole rdp scanner
 
 echo -e "[${BLUE}*${RESET}] Running MSF RDP Check...\n"
 rdphosts=${varOutPath}rdp-hosts.txt
 if [ -f "$rdphosts" ]; then
-    msfconsole -x "use auxiliary/scanner/rdp/rdp_scanner; set RHOSTS file:${varWorkingDir}/${clientcode}/scans/${clientcode}_parsed/rdp-hosts.txt; spool ${workingdir}/${clientcode}/rdp/rdp_scan.out; run; exit"
-    cat ./${clientcode}/rdp/rdp_scan.out | grep -a "NLA: Off" > ./${clientcode}/rdp/rdp_nla.out
-    cat ./${clientcode}/rdp/rdp_nla.out | cut -d ' ' -f 2 | cut -d ':' -f 1 > ./${clientcode}/rdp/nla_hosts.txt
-    echo -e "\n[${BLUE}*${RESET}] MSF RDP check completed. Check rdp directory for results.\n"
+    msfconsole -x "use auxiliary/scanner/rdp/rdp_scanner; set RHOSTS file:${varWorkingDir}/${clientcode}/scans/${clientcode}_parsed/rdp-hosts.txt; spool ${workingdir}/${clientcode}/other/rdp_scan.out; run; exit"
+    cat ./${clientcode}/other/rdp_scan.out | grep -a "NLA: Off" > ./${clientcode}/other/rdp_nla.out
+    cat ./${clientcode}/other/rdp_nla.out | cut -d ' ' -f 2 | cut -d ':' -f 1 > ./${clientcode}/other/rdp_nla_hosts.txt
+    echo -e "\n[${BLUE}*${RESET}] MSF RDP check completed. Check other directory for results.\n"
 else 
     echo -e "[${RED}!${RESET}] $rdphosts does not exist. Skipping RDP enumeration.\n"
 fi
-
