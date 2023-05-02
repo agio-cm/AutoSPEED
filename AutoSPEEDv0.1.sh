@@ -424,7 +424,7 @@ fi
 echo -e "[${BLUE}*${RESET}] Running MSF RDP Check...\n"
 rdphosts=${varOutPath}rdp-hosts.txt
 if [ -f "$rdphosts" ]; then
-    msfconsole -x "use auxiliary/scanner/rdp/rdp_scanner; set RHOSTS file:${varWorkingDir}/${clientcode}/scans/${clientcode}_parsed/rdp-hosts.txt; run; exit" | tee ${varWorkingDir}/${clientcode}/other/rdp_scan.out
+    msfconsole -q -x "use auxiliary/scanner/rdp/rdp_scanner; set RHOSTS file:${varWorkingDir}/${clientcode}/scans/${clientcode}_parsed/rdp-hosts.txt; run; exit" | tee ${varWorkingDir}/${clientcode}/other/rdp_scan.out
     cat ./${clientcode}/other/rdp_scan.out | grep -a "NLA: No" > ./${clientcode}/other/rdp_nla.out
     cat ./${clientcode}/other/rdp_nla.out | cut -d ' ' -f 2 | cut -d ':' -f 1 > ./${clientcode}/other/rdp_nla_hosts.txt
     echo -e "\n[${BLUE}*${RESET}] MSF RDP check completed. Check other directory for results.\n"
