@@ -431,3 +431,14 @@ if [ -f "$rdphosts" ]; then
 else 
     echo -e "[${RED}!${RESET}] $rdphosts does not exist. Skipping RDP enumeration.\n"
 fi
+
+# file check and msfconsole ipmi scanner
+
+echo -e "[${BLUE}*${RESET}] Running MSF IPMI Scan...\n"
+ipmihosts=${varOutPath}ipmi_hosts.txt
+if [ -f "$ipmihosts" ]; then
+    msfconsole -q -x "use auxiliary/scanner/ipmi/ipmi_dumphashes; set RHOSTS file:${varWorkingDir}/${clientcode}/scans/ipmi_hosts.txt; run; exit" | tee ${varWorkingDir}/${clientcode}/other/ipmi_scan.out
+    echo -e "\n[${BLUE}*${RESET}] MSF IPMI scan completed. Check other directory for results.\n"
+else 
+    echo -e "[${RED}!${RESET}] $ipmihosts does not exist. Skipping IPMI scanning.\n"
+fi
