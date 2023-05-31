@@ -148,13 +148,13 @@ if [[ "$scantype" == "all" ]]; then
         echo -e "[${BLUE}*${RESET}] Starting full port TCP nmap scan...\n"
         tcpscanoutput="./${clientcode}/scans/${clientcode}_tcp_fullport"
         tcpgreppable="./${clientcode}/scans/${clientcode}_tcp_fullport.gnmap"
-        nmap -iL $targetfile -p- --max-retries=2 --stats-every=2m --excludefile ${exclusions} -oA ${tcpscanoutput}
+        nmap -iL $targetfile -p- --max-retries=2 --stats-every=2m --excludefile ${exclusions} -oA ${tcpscanoutput} --host-timeout=15m
         echo -e "\n[${BLUE}*${RESET}] Full port TCP nmap completed!\n"
         
         echo -e "[${BLUE}*${RESET}] Starting UDP top 100 port nmap scan...\n"
         udpscanoutput="./${clientcode}/scans/${clientcode}_udp_top100"
         udpgreppable="./${clientcode}/scans/${clientcode}_udp_top100.gnmap"
-        nmap -iL $targetfile -sU --top-ports 100 --max-retries=2 --excludefile ${exclusions} --stats-every=2m -oA ${udpscanoutput}
+        nmap -iL $targetfile -sU --top-ports 100 --max-retries=2 --excludefile ${exclusions} --stats-every=2m -oA ${udpscanoutput} --host-timeout=15m
         echo -e "\n[${BLUE}*${RESET}] UDP top 100 ports nmap scan completed!\n"
         
         echo -e "[${BLUE}*${RESET}] Starting egress scans...\n"
@@ -169,7 +169,7 @@ if [[ "$scantype" == "top1000" ]]; then
         echo -e "[${BLUE}*${RESET}] Starting top 1000 TCP nmap scan...\n"
         tcpscanoutput="./${clientcode}/scans/${clientcode}_tcp_top1000"
         tcpgreppable="./${clientcode}/scans/${clientcode}_tcp_top1000.gnmap"
-        nmap -iL $targetfile --top-ports 1000 --max-retries=2 --stats-every=2m --excludefile ${exclusions} -oA ${tcpscanoutput}
+        nmap -iL $targetfile --top-ports 1000 --max-retries=2 --stats-every=2m --excludefile ${exclusions} -oA ${tcpscanoutput} --host-timeout=15m
         echo -e "\n[${BLUE}*${RESET}] TCP top 1000 ports nmap scan completed!\n"
 fi
 
@@ -410,8 +410,8 @@ echo -e "[${BLUE}*${RESET}] Running Crackmapexec...\n"
 smbhosts=${varOutPath}smb-hosts.txt
 if [ -f "$smbhosts" ]; then
     crackmapexec smb ${varOutPath}smb-hosts.txt | tee ./${clientcode}/smb/cme.out
-    cat ./${clientcode}/smb/cme.out | grep "signing:False" > ./${clientcode}/smb/no_signing.out
-    cat ./${clientcode}/smb/cme.out | grep "SMBv1:True" > ./${clientcode}/smb/smbv1.out
+    cat ./${clientcode}/smb/cme.out | grep -a "signing:False" > ./${clientcode}/smb/no_signing.out
+    cat ./${clientcode}/smb/cme.out | grep -a "SMBv1:True" > ./${clientcode}/smb/smbv1.out
     cat ./${clientcode}/smb/no_signing.out | cut -d ' ' -f 10 > ./${clientcode}/smb/no_signing_hosts.txt
     cat ./${clientcode}/smb/smbv1.out | cut -d ' ' -f 10 > ./${clientcode}/smb/smbv1_hosts.txt
     numSigning=$(cat ./${clientcode}/smb/no_signing_hosts.txt| wc -l)
