@@ -157,10 +157,10 @@ if [[ "$scantype" == "all" ]]; then
         echo -e "\n[${BLUE}*${RESET}] UDP top 100 ports nmap scan completed!\n"
         
         echo -e "[${BLUE}*${RESET}] Starting egress scans...\n"
-        nmap -Pn -p- allports.exposed -oA ./${clientcode}/scans/${clientcode}_egress_fullport
-        nmap -Pn -p1-40 allports.exposed -oN ./${clientcode}/scans/${clientcode}_egress_1-40
-        nmap -Pn -p41-80 allports.exposed -oN ./${clientcode}/scans/${clientcode}_egress_41-80
-        nmap -Pn -p81-120 allports.exposed -oN ./${clientcode}/scans/${clientcode}_egress_81-120
+        nmap -Pn -p- egadz.metasploit.com -oA ./${clientcode}/scans/${clientcode}_egress_fullport
+        nmap -Pn -p1-40 egadz.metasploit.com -oN ./${clientcode}/scans/${clientcode}_egress_1-40
+        nmap -Pn -p41-80 egadz.metasploit.com -oN ./${clientcode}/scans/${clientcode}_egress_41-80
+        nmap -Pn -p81-120 egadz.metasploit.com -oN ./${clientcode}/scans/${clientcode}_egress_81-120
         echo -e "\n[${BLUE}*${RESET}] Egress scans completed! \n"
 fi
 
@@ -174,10 +174,10 @@ fi
 
 if [[ "$scantype" == "egress" ]]; then
         echo -e "[${BLUE}*${RESET}] Starting egress scans only...\n"
-        nmap -Pn -p- allports.exposed -oA ./${clientcode}/scans/${clientcode}_egress_fullport
-        nmap -Pn -p1-40 allports.exposed -oN ./${clientcode}/scans/${clientcode}_egress_1-40
-        nmap -Pn -p41-80 allports.exposed -oN ./${clientcode}/scans/${clientcode}_egress_41-80
-        nmap -Pn -p81-120 allports.exposed -oN ./${clientcode}/scans/${clientcode}_egress_81-120
+        nmap -Pn -p- egadz.metasploit.com -oA ./${clientcode}/scans/${clientcode}_egress_fullport
+        nmap -Pn -p1-40 egadz.metasploit.com -oN ./${clientcode}/scans/${clientcode}_egress_1-40
+        nmap -Pn -p41-80 egadz.metasploit.com -oN ./${clientcode}/scans/${clientcode}_egress_41-80
+        nmap -Pn -p81-120 egadz.metasploit.com -oN ./${clientcode}/scans/${clientcode}_egress_81-120
         echo -e "\n[${BLUE}*${RESET}] Egress scans completed! \n"
         exit 0
 fi
