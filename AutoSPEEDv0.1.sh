@@ -147,20 +147,20 @@ if [[ "$scantype" == "all" ]]; then
         echo -e "[${BLUE}*${RESET}] Starting full port TCP nmap scan...\n"
         tcpscanoutput="./${clientcode}/scans/${clientcode}_tcp_fullport"
         tcpgreppable="./${clientcode}/scans/${clientcode}_tcp_fullport.gnmap"
-        nmap -iL $targetfile -p- --max-retries=5 --stats-every=2m --excludefile ${exclusions} -oA ${tcpscanoutput} --host-timeout=20m
+        sudo nmap -iL $targetfile -p- --max-retries=5 --stats-every=2m --excludefile ${exclusions} -oA ${tcpscanoutput} --host-timeout=20m
         echo -e "\n[${BLUE}*${RESET}] Full port TCP nmap completed!\n"
         
         echo -e "[${BLUE}*${RESET}] Starting UDP top 100 port nmap scan...\n"
         udpscanoutput="./${clientcode}/scans/${clientcode}_udp_top100"
         udpgreppable="./${clientcode}/scans/${clientcode}_udp_top100.gnmap"
-        nmap -iL $targetfile -sU --top-ports 100 --max-retries=5 --excludefile ${exclusions} --stats-every=2m -oA ${udpscanoutput} --host-timeout=20m
+        sudo nmap -iL $targetfile -sU --top-ports 100 --max-retries=5 --excludefile ${exclusions} --stats-every=2m -oA ${udpscanoutput} --host-timeout=20m
         echo -e "\n[${BLUE}*${RESET}] UDP top 100 ports nmap scan completed!\n"
         
         echo -e "[${BLUE}*${RESET}] Starting egress scans...\n"
-        nmap -Pn -p- egadz.metasploit.com -oA ./${clientcode}/scans/${clientcode}_egress_fullport
-        nmap -Pn -p1-40 egadz.metasploit.com -oN ./${clientcode}/scans/${clientcode}_egress_1-40
-        nmap -Pn -p41-80 egadz.metasploit.com -oN ./${clientcode}/scans/${clientcode}_egress_41-80
-        nmap -Pn -p81-120 egadz.metasploit.com -oN ./${clientcode}/scans/${clientcode}_egress_81-120
+        sudo nmap -Pn -p- egadz.metasploit.com -oA ./${clientcode}/scans/${clientcode}_egress_fullport
+        sudo nmap -Pn -p1-40 egadz.metasploit.com -oN ./${clientcode}/scans/${clientcode}_egress_1-40
+        sudo nmap -Pn -p41-80 egadz.metasploit.com -oN ./${clientcode}/scans/${clientcode}_egress_41-80
+        sudo nmap -Pn -p81-120 egadz.metasploit.com -oN ./${clientcode}/scans/${clientcode}_egress_81-120
         echo -e "\n[${BLUE}*${RESET}] Egress scans completed! \n"
 fi
 
@@ -168,16 +168,16 @@ if [[ "$scantype" == "top1000" ]]; then
         echo -e "[${BLUE}*${RESET}] Starting top 1000 TCP nmap scan...\n"
         tcpscanoutput="./${clientcode}/scans/${clientcode}_tcp_top1000"
         tcpgreppable="./${clientcode}/scans/${clientcode}_tcp_top1000.gnmap"
-        nmap -iL $targetfile --top-ports 1000 --max-retries=5 --stats-every=2m --excludefile ${exclusions} -oA ${tcpscanoutput} --host-timeout=20m
+        sudo nmap -iL $targetfile --top-ports 1000 --max-retries=5 --stats-every=2m --excludefile ${exclusions} -oA ${tcpscanoutput} --host-timeout=20m
         echo -e "\n[${BLUE}*${RESET}] TCP top 1000 ports nmap scan completed!\n"
 fi
 
 if [[ "$scantype" == "egress" ]]; then
         echo -e "[${BLUE}*${RESET}] Starting egress scans only...\n"
-        nmap -Pn -p- egadz.metasploit.com -oA ./${clientcode}/scans/${clientcode}_egress_fullport
-        nmap -Pn -p1-40 egadz.metasploit.com -oN ./${clientcode}/scans/${clientcode}_egress_1-40
-        nmap -Pn -p41-80 egadz.metasploit.com -oN ./${clientcode}/scans/${clientcode}_egress_41-80
-        nmap -Pn -p81-120 egadz.metasploit.com -oN ./${clientcode}/scans/${clientcode}_egress_81-120
+        sudo nmap -Pn -p- egadz.metasploit.com -oA ./${clientcode}/scans/${clientcode}_egress_fullport
+        sudo nmap -Pn -p1-40 egadz.metasploit.com -oN ./${clientcode}/scans/${clientcode}_egress_1-40
+        sudo nmap -Pn -p41-80 egadz.metasploit.com -oN ./${clientcode}/scans/${clientcode}_egress_41-80
+        sudo nmap -Pn -p81-120 egadz.metasploit.com -oN ./${clientcode}/scans/${clientcode}_egress_81-120
         echo -e "\n[${BLUE}*${RESET}] Egress scans completed! \n"
         exit 0
 fi
