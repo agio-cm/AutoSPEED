@@ -147,13 +147,13 @@ if [[ "$scantype" == "all" ]]; then
         echo -e "[${BLUE}*${RESET}] Starting full port TCP nmap scan...\n"
         tcpscanoutput="./${clientcode}/scans/${clientcode}_tcp_fullport"
         tcpgreppable="./${clientcode}/scans/${clientcode}_tcp_fullport.gnmap"
-        sudo nmap -iL $targetfile -p- --max-retries=20 --stats-every=2m --excludefile ${exclusions} -oA ${tcpscanoutput} --host-timeout=20m
+        sudo nmap -iL $targetfile -R -p- --max-retries=5 --stats-every=2m --excludefile ${exclusions} -oA ${tcpscanoutput}
         echo -e "\n[${BLUE}*${RESET}] Full port TCP nmap completed!\n"
         
         echo -e "[${BLUE}*${RESET}] Starting UDP top 100 port nmap scan...\n"
         udpscanoutput="./${clientcode}/scans/${clientcode}_udp_top100"
         udpgreppable="./${clientcode}/scans/${clientcode}_udp_top100.gnmap"
-        sudo nmap -iL $targetfile -sU --top-ports 100 --max-retries=20 --excludefile ${exclusions} --stats-every=2m -oA ${udpscanoutput} --host-timeout=20m
+        sudo nmap -iL $targetfile -sU -R --top-ports 100 --max-retries=5 --excludefile ${exclusions} --stats-every=2m -oA ${udpscanoutput}
         echo -e "\n[${BLUE}*${RESET}] UDP top 100 ports nmap scan completed!\n"
         
         echo -e "[${BLUE}*${RESET}] Starting egress scans...\n"
@@ -168,7 +168,7 @@ if [[ "$scantype" == "top1000" ]]; then
         echo -e "[${BLUE}*${RESET}] Starting top 1000 TCP nmap scan...\n"
         tcpscanoutput="./${clientcode}/scans/${clientcode}_tcp_top1000"
         tcpgreppable="./${clientcode}/scans/${clientcode}_tcp_top1000.gnmap"
-        sudo nmap -iL $targetfile --top-ports 1000 --max-retries=20 --stats-every=2m --excludefile ${exclusions} -oA ${tcpscanoutput} --host-timeout=20m
+        sudo nmap -iL $targetfile -R --top-ports 1000 --max-retries=5 --stats-every=2m --excludefile ${exclusions} -oA ${tcpscanoutput}
         echo -e "\n[${BLUE}*${RESET}] TCP top 1000 ports nmap scan completed!\n"
 fi
 
