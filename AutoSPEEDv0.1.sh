@@ -7,6 +7,10 @@ BLUE2="\033[0;34m"
 RESET="\033[0m"
 BOLD="\e[1m"
 
+# some cool variables
+scantype="default"
+options="a"
+
 # heading!
 
 echo -e "${RED}"
@@ -53,7 +57,7 @@ fi
 
 # processing options
 
-while getopts 'c:t:s:e:h' opt; do
+while getopts 'c:t:s:e:o:h' opt; do
   case "$opt" in
     c)
       clientcode="$OPTARG"
@@ -74,6 +78,10 @@ while getopts 'c:t:s:e:h' opt; do
       echo -e "[${BLUE}*${RESET}] Setting exclusions file to '$exclusions'"
       ;;
 
+    o)
+      options="$OPTARG"
+      echo -e "[${BLUE}*${RESET}] Setting options to '$options'"
+      ;;
 
     h)
       echo -e "[${BLUE}*${RESET}] Usage: $(basename $0) -c clientcode -t targetfile -s scantype [options]"
@@ -82,9 +90,13 @@ while getopts 'c:t:s:e:h' opt; do
       echo -e "              -t:  specify target file with IP addresses or ranges to scan"
       echo -e "              -s:  specify scan type"
       echo -e "                   scan types:"
-      echo -e "                   all:      full port TCP scan, UDP top 100 scan, egress scans"
-      echo -e "                   top1000:  top 1000 TCP ports scan only, then continue"
-      echo -e "                   egress:   egress scans only"
+      echo -e "                   default:  top 1000 TCP ports scan"
+      echo -e "                   allports: full port TCP scan"
+      echo -e "                   nodisc:   skip host discovery"
+      echo -e "              -o:  optional scan skipping"
+      echo -e "                   e:  skip egress scanning"
+      echo -e "                   u:  skip UDP scanning"
+      echo -e "                   eu:  skip egress and UDP scanning"
       echo -e "              -e:  specify exclusions file\n"
       exit 0
       ;;
@@ -107,7 +119,7 @@ sleep 2
 echo -e "[${BLUE}*${RESET}] And away we go.....\n"
 # Check for missing arguments
 
-if [ -z "$targetfile" ] || [ -z "$scantype" ] || [ -z "$clientcode" ]; then
+if [ -z "$targetfile" ] || [ -z "$clientcode" ]; then
         echo -e "[${RED}!${RESET}] .....just kidding. Missing required arguments.\n\n    For usage, use $(basename $0) -h"
         exit 1
 fi
@@ -116,7 +128,7 @@ sleep 2
 
 # checking for wrong scan argument
 
-if [[ "$scantype" != "all" ]] && [[ "$scantype" != "top1000" ]] && [[ "$scantype" != "egress" ]]; then
+if [[ "$scantype" != "default" ]] && [[ "$scantype" != "allports" ]] && [[ "$scantype" != "nodisc" ]]; then
         echo -e "[${RED}!${RESET}] .....just kidding. Wrong scan type.\n"
         exit 1
 fi
@@ -143,28 +155,16 @@ sleep 2
 
 # start scanning
 
-if [[ "$scantype" == "all" ]]; then
+if [[ "$scantype" == "allports" ]]; then
         echo -e "[${BLUE}*${RESET}] Starting full port TCP nmap scan...\n"
         tcpscanoutput="./${clientcode}/scans/${clientcode}_tcp_fullport"
         tcpgreppable="./${clientcode}/scans/${clientcode}_tcp_fullport.gnmap"
         sudo nmap -iL $targetfile -R -p- --max-retries=5 --stats-every=2m --excludefile ${exclusions} -oA ${tcpscanoutput}
         echo -e "\n[${BLUE}*${RESET}] Full port TCP nmap completed!\n"
-        
-        echo -e "[${BLUE}*${RESET}] Starting UDP top 100 port nmap scan...\n"
-        udpscanoutput="./${clientcode}/scans/${clientcode}_udp_top100"
-        udpgreppable="./${clientcode}/scans/${clientcode}_udp_top100.gnmap"
-        sudo nmap -iL $targetfile -sU -R --top-ports 100 --max-retries=5 --excludefile ${exclusions} --stats-every=2m -oA ${udpscanoutput}
-        echo -e "\n[${BLUE}*${RESET}] UDP top 100 ports nmap scan completed!\n"
-        
-        echo -e "[${BLUE}*${RESET}] Starting egress scans...\n"
-        sudo nmap -Pn -p- egadz.metasploit.com -oA ./${clientcode}/scans/${clientcode}_egress_fullport
-        sudo nmap -Pn -p1-40 egadz.metasploit.com -oN ./${clientcode}/scans/${clientcode}_egress_1-40
-        sudo nmap -Pn -p41-80 egadz.metasploit.com -oN ./${clientcode}/scans/${clientcode}_egress_41-80
-        sudo nmap -Pn -p81-120 egadz.metasploit.com -oN ./${clientcode}/scans/${clientcode}_egress_81-120
-        echo -e "\n[${BLUE}*${RESET}] Egress scans completed! \n"
+
 fi
 
-if [[ "$scantype" == "top1000" ]]; then
+if [[ "$scantype" == "default" ]]; then
         echo -e "[${BLUE}*${RESET}] Starting top 1000 TCP nmap scan...\n"
         tcpscanoutput="./${clientcode}/scans/${clientcode}_tcp_top1000"
         tcpgreppable="./${clientcode}/scans/${clientcode}_tcp_top1000.gnmap"
@@ -172,29 +172,15 @@ if [[ "$scantype" == "top1000" ]]; then
         echo -e "\n[${BLUE}*${RESET}] TCP top 1000 ports nmap scan completed!\n"
 fi
 
-if [[ "$scantype" == "egress" ]]; then
-        echo -e "[${BLUE}*${RESET}] Starting egress scans only...\n"
-        sudo nmap -Pn -p- egadz.metasploit.com -oA ./${clientcode}/scans/${clientcode}_egress_fullport
-        sudo nmap -Pn -p1-40 egadz.metasploit.com -oN ./${clientcode}/scans/${clientcode}_egress_1-40
-        sudo nmap -Pn -p41-80 egadz.metasploit.com -oN ./${clientcode}/scans/${clientcode}_egress_41-80
-        sudo nmap -Pn -p81-120 egadz.metasploit.com -oN ./${clientcode}/scans/${clientcode}_egress_81-120
-        echo -e "\n[${BLUE}*${RESET}] Egress scans completed! \n"
-        exit 0
+if [[ "$scantype" == "nodisc" ]]; then
+        echo -e "[${BLUE}*${RESET}] Starting top 1000 TCP nmap scan...\n"
+        tcpscanoutput="./${clientcode}/scans/${clientcode}_tcp_top1000"
+        tcpgreppable="./${clientcode}/scans/${clientcode}_tcp_top1000.gnmap"
+        sudo nmap -iL $targetfile -R --top-ports 1000 --max-retries=5 --stats-every=2m -Pn --excludefile ${exclusions} -oA ${tcpscanoutput}
+        echo -e "\n[${BLUE}*${RESET}] TCP top 1000 ports nmap scan completed!\n"
 fi
 
-# remove temporary exclusions file
-
-tempfile=exclude.tmp
-if [ -f "$tempfile" ]; then
-    rm exclude.tmp
-fi
-
-
-# parsing script (https://github.com/actuated/nmap-grep/blob/master/nmap-grep.sh)
-
-sleep 2
-
-#  variables
+# varying variables
 
 varTempRandom=$(( ( RANDOM % 9999 ) + 1 ))
 varTempFile="temp-nmp-$varTempRandom.txt"
@@ -210,6 +196,11 @@ varChangeOutDir="Y"
 varCustomOut="./${clientcode}/scans/${clientcode}_parsed"
 varOutPath="${varCustomOut}/"
 varWorkingDir="$(pwd)"
+
+# parsing function
+# parsing script (https://github.com/actuated/nmap-grep/blob/master/nmap-grep.sh)
+
+parsing() {
 
 echo -e "[${BLUE}*${RESET}] Parsing nmap output "
 echo -e "    File: ${tcpgreppable}"
@@ -370,18 +361,54 @@ fi
 
 rm $varOutPath$varTempFile
 
-# grep UDP for ipmi hosts
+echo -e "[${BLUE}*${RESET}] TCP parsing complete!\n"
+}
 
-if [ -f "$udpgreppable" ]; then
-  cat ${udpgreppable} | grep "623/open/udp" | cut -d ' ' -f 2 > ./${clientcode}/scans/ipmi_hosts.txt
+parsing
+
+# more varying variables
+
+parsedtargetfile="./${clientcode}/scans/${clientcode}_parsed/up-hosts.txt"
+
+if [[ "$options" != *"u"* ]]; then
+        echo -e "[${BLUE}*${RESET}] Starting UDP nmap scan...\n"
+        udpscanoutput="./${clientcode}/scans/${clientcode}_udp"
+        udpgreppable="./${clientcode}/scans/${clientcode}_udp.gnmap"
+        sudo nmap -iL $parsedtargetfile -sU -R -p53,161,623 --max-retries=5 --excludefile ${exclusions} --stats-every=2m -oA ${udpscanoutput}
+        echo -e "\n[${BLUE}*${RESET}] UDP nmap scan completed!\n"
+
+	if [ -f "$udpgreppable" ]; then
+  	  cat ${udpgreppable} | grep "53/open/udp" | cut -d ' ' -f 2 > ./${clientcode}/scans/${clientcode}_parsed/dns_hosts.txt
+	fi
+
+	if [ -f "$udpgreppable" ]; then
+	  cat ${udpgreppable} | grep "161/open/udp" | cut -d ' ' -f 2 > ./${clientcode}/scans/${clientcode}_parsed/snmp_hosts.txt
+	fi
+
+	if [ -f "$udpgreppable" ]; then
+	  cat ${udpgreppable} | grep "623/open/udp" | cut -d ' ' -f 2 > ./${clientcode}/scans/${clientcode}_parsed/ipmi_hosts.txt
+	fi
+
+	echo -e "[${BLUE}*${RESET}] UDP parsing complete!\n"
 fi
 
+if [[ "$options" != *"e"* ]]; then
+        echo -e "[${BLUE}*${RESET}] Starting egress scans...\n"
+        sudo nmap -Pn -p- egadz.metasploit.com -oA ./${clientcode}/scans/${clientcode}_egress_fullport
+        sudo nmap -Pn -p1-40 egadz.metasploit.com -oN ./${clientcode}/scans/${clientcode}_egress_1-40
+        sudo nmap -Pn -p41-80 egadz.metasploit.com -oN ./${clientcode}/scans/${clientcode}_egress_41-80
+        sudo nmap -Pn -p81-120 egadz.metasploit.com -oN ./${clientcode}/scans/${clientcode}_egress_81-120
+        echo -e "\n[${BLUE}*${RESET}] Egress scans completed! \n"
+fi
 
-echo -e "[${BLUE}*${RESET}] Parsing complete!\n"
+# remove temporary exclusions file
+
+tempfile=exclude.tmp
+if [ -f "$tempfile" ]; then
+    rm exclude.tmp
+fi
 
 sleep 2
-
-
 
 # SMB Time!
 
@@ -436,7 +463,7 @@ fi
 echo -e "[${BLUE}*${RESET}] Running MSF IPMI Scan...\n"
 ipmihosts=${varOutPath}ipmi_hosts.txt
 if [ -f "$ipmihosts" ]; then
-    msfconsole -q -x "use auxiliary/scanner/ipmi/ipmi_dumphashes; set RHOSTS file:${varWorkingDir}/${clientcode}/scans/ipmi_hosts.txt; run; exit" | tee ${varWorkingDir}/${clientcode}/other/ipmi_scan.out
+    msfconsole -q -x "use auxiliary/scanner/ipmi/ipmi_dumphashes; set RHOSTS file:${varWorkingDir}/${clientcode}/scans/${clientcode}_parsed/ipmi_hosts.txt; run; exit" | tee ${varWorkingDir}/${clientcode}/other/ipmi_scan.out
     echo -e "\n[${BLUE}*${RESET}] MSF IPMI scan completed. Check other directory for results.\n"
 else 
     echo -e "[${RED}!${RESET}] $ipmihosts does not exist. Skipping IPMI scanning.\n"
