@@ -370,6 +370,8 @@ parsing
 
 parsedtargetfile="./${clientcode}/scans/${clientcode}_parsed/up-hosts.txt"
 
+# UDP scan and parse
+
 if [[ "$options" != *"u"* ]]; then
         echo -e "[${BLUE}*${RESET}] Starting UDP nmap scan...\n"
         udpscanoutput="./${clientcode}/scans/${clientcode}_udp"
@@ -389,7 +391,11 @@ if [[ "$options" != *"u"* ]]; then
 	  cat ${udpgreppable} | grep "623/open/udp" | cut -d ' ' -f 2 > ./${clientcode}/scans/${clientcode}_parsed/ipmi_hosts.txt
 	fi
 
-	echo -e "[${BLUE}*${RESET}] UDP parsing complete!\n"
+# cleanup of blank files
+
+  find ./${clientcode}/scans/${clientcode}_parsed -size 0 -print -delete
+
+	echo -e "[${BLUE}*${RESET}] UDP parsing and cleanup complete!\n"
 fi
 
 if [[ "$options" != *"e"* ]]; then
@@ -430,7 +436,7 @@ fi
 
 sleep 2
 
-# file check and crackmapexec
+# crackmapexec time!
 
 echo -e "[${BLUE}*${RESET}] Running Crackmapexec...\n"
 crackmapexec smb $targetfile --gen-relay-list ./${clientcode}/smb/no_signing_hosts.txt | tee ./${clientcode}/smb/cme.out
