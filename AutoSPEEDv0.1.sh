@@ -93,6 +93,8 @@ while getopts 'c:t:s:e:o:h' opt; do
       echo -e "                   default:  top 1000 TCP ports scan"
       echo -e "                   allports: full port TCP scan"
       echo -e "                   nodisc:   skip host discovery"
+      echo -e "                   seg:      segmentation scanning for TCP and UDP ONLY"
+      echo -e "                   egress:   egress scanning ONLY"
       echo -e "              -o:  optional scan skipping"
       echo -e "                   e:  skip egress scanning"
       echo -e "                   u:  skip UDP scanning"
@@ -117,10 +119,24 @@ shift "$(($OPTIND -1))"
 sleep 2
 
 echo -e "[${BLUE}*${RESET}] And away we go.....\n"
+
 # Check for missing arguments
 
+if [ -z "$clientcode" ]; then
+        echo -e "[${RED}!${RESET}] .....just kidding. Missing required client code.\n\n    For usage, use $(basename $0) -h"
+        exit 1
+fi
+
+if [[ "$scantype" == "egress" ]]; then
+        echo -e "[${BLUE}*${RESET}] Starting egress scans...\n"
+        sudo nmap -Pn -vv --reason -p- egadz.metasploit.com -oA ./${clientcode}/scans/${clientcode}_egress_fullport
+        sudo nmap -Pn -vv --reason --top-ports 40 egadz.metasploit.com -oN ./${clientcode}/scans/${clientcode}_egress_top_40
+        echo -e "\n[${BLUE}*${RESET}] Egress scans completed! \n"
+        exit 0
+fi
+
 if [ -z "$targetfile" ] || [ -z "$clientcode" ]; then
-        echo -e "[${RED}!${RESET}] .....just kidding. Missing required arguments.\n\n    For usage, use $(basename $0) -h"
+        echo -e "[${RED}!${RESET}] .....just kidding. Missing required target file.\n\n    For usage, use $(basename $0) -h"
         exit 1
 fi
 
@@ -128,7 +144,7 @@ sleep 2
 
 # checking for wrong scan argument
 
-if [[ "$scantype" != "default" ]] && [[ "$scantype" != "allports" ]] && [[ "$scantype" != "nodisc" ]]; then
+if [[ "$scantype" != "default" ]] && [[ "$scantype" != "allports" ]] && [[ "$scantype" != "nodisc" ]] && [[ "$scantype" != "seg" ]] && [[ "$scantype" != "egress" ]]; then
         echo -e "[${RED}!${RESET}] .....just kidding. Wrong scan type.\n"
         exit 1
 fi
@@ -173,11 +189,23 @@ if [[ "$scantype" == "default" ]]; then
 fi
 
 if [[ "$scantype" == "nodisc" ]]; then
-        echo -e "[${BLUE}*${RESET}] Starting top 1000 TCP nmap scan...\n"
-        tcpscanoutput="./${clientcode}/scans/${clientcode}_tcp_top1000"
-        tcpgreppable="./${clientcode}/scans/${clientcode}_tcp_top1000.gnmap"
+        echo -e "[${BLUE}*${RESET}] Starting top 1000 TCP nmap scan with no host discovery...\n"
+        tcpscanoutput="./${clientcode}/scans/${clientcode}_tcp_top1000_nodisc"
+        tcpgreppable="./${clientcode}/scans/${clientcode}_tcp_top1000_nodisc.gnmap"
         sudo nmap -iL $targetfile -R --top-ports 1000 --max-retries=5 --stats-every=2m -Pn --excludefile ${exclusions} -oA ${tcpscanoutput}
         echo -e "\n[${BLUE}*${RESET}] TCP top 1000 ports nmap scan completed!\n"
+fi
+
+if [[ "$scantype" == "seg" ]]; then
+        echo -e "[${BLUE}*${RESET}] Starting segmentation TCP nmap scan...\n"
+        tcpscanoutput="./${clientcode}/scans/${clientcode}_tcp_seg"
+        sudo nmap -iL $targetfile -Pn -p- --max-retries=5 --stats-every=2m --excludefile ${exclusions} -oA ${tcpscanoutput}
+        echo -e "\n[${BLUE}*${RESET}] TCP top 1000 ports nmap scan completed!\n"
+        echo -e "[${BLUE}*${RESET}] Starting segmentation UDP nmap scan...\n"
+        udpscanoutput="./${clientcode}/scans/${clientcode}_udp_CDE"
+        sudo nmap -iL $targetfile -sU -Pn --top-ports 100 --max-retries=5 --excludefile ${exclusions} --stats-every=2m -oA ${udpscanoutput}
+        echo -e "\n[${BLUE}*${RESET}] UDP nmap scan completed!\n"
+        exit 0
 fi
 
 # varying variables
@@ -400,10 +428,8 @@ fi
 
 if [[ "$options" != *"e"* ]]; then
         echo -e "[${BLUE}*${RESET}] Starting egress scans...\n"
-        sudo nmap -Pn -p- egadz.metasploit.com -oA ./${clientcode}/scans/${clientcode}_egress_fullport
-        sudo nmap -Pn -p1-40 egadz.metasploit.com -oN ./${clientcode}/scans/${clientcode}_egress_1-40
-        sudo nmap -Pn -p41-80 egadz.metasploit.com -oN ./${clientcode}/scans/${clientcode}_egress_41-80
-        sudo nmap -Pn -p81-120 egadz.metasploit.com -oN ./${clientcode}/scans/${clientcode}_egress_81-120
+        sudo nmap -Pn -vv --reason -p- egadz.metasploit.com -oA ./${clientcode}/scans/${clientcode}_egress_fullport
+        sudo nmap -Pn -vv --reason --top-ports 40 egadz.metasploit.com -oN ./${clientcode}/scans/${clientcode}_egress_top_40
         echo -e "\n[${BLUE}*${RESET}] Egress scans completed! \n"
 fi
 
