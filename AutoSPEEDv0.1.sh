@@ -140,8 +140,8 @@ sleep 2
 
 if [[ "$scantype" == "egress" ]]; then
         echo -e "[${BLUE}*${RESET}] Starting egress scans...\n"
-        sudo nmap -Pn -vv --reason -p- egadz.metasploit.com -oA ./${clientcode}/scans/${clientcode}_egress_fullport
-        sudo nmap -Pn -vv --reason --top-ports 40 egadz.metasploit.com -oN ./${clientcode}/scans/${clientcode}_egress_top_40
+        sudo nmap -Pn -p- egadz.metasploit.com -oA ./${clientcode}/scans/${clientcode}_egress_fullport
+        sudo nmap -Pn --top-ports 40 egadz.metasploit.com -oN ./${clientcode}/scans/${clientcode}_egress_top_40
         echo -e "\n[${BLUE}*${RESET}] Egress scans completed! \n"
         exit 0
 fi
