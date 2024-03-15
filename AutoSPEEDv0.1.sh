@@ -127,6 +127,17 @@ if [ -z "$clientcode" ]; then
         exit 1
 fi
 
+# make directory structure
+
+echo -e "[${BLUE}*${RESET}] Creating directory structure..."
+
+  mkdir ./${clientcode}
+  mkdir ./${clientcode}/scans
+  mkdir ./${clientcode}/other
+  echo -e "[${BLUE}*${RESET}] Directory structure created successfully. Continuing.\n"
+  
+sleep 2
+
 if [[ "$scantype" == "egress" ]]; then
         echo -e "[${BLUE}*${RESET}] Starting egress scans...\n"
         sudo nmap -Pn -vv --reason -p- egadz.metasploit.com -oA ./${clientcode}/scans/${clientcode}_egress_fullport
@@ -155,19 +166,6 @@ if [ -z "$exclusions" ]; then
         touch exclude.tmp
         exclusions=exclude.tmp        
 fi
-
-
-# make directory structure
-
-echo -e "[${BLUE}*${RESET}] Creating directory structure..."
-
-  mkdir ./${clientcode}
-  mkdir ./${clientcode}/scans
-  mkdir ./${clientcode}/other
-  echo -e "[${BLUE}*${RESET}] Directory structure created successfully. Continuing.\n"
-  
-sleep 2
-
 
 # start scanning
 
