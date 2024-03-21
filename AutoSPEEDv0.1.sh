@@ -43,7 +43,7 @@ echo -e "#${BLUE}                                                               
 echo -e "#${BLUE2}           ${BOLD}Auto${BLUE2}mated ${BOLD}S${BLUE2}can ${BOLD}P${BLUE2}arse ${BOLD}E${BLUE2}numerate ${BOLD}E${BLUE2}xploit ${BOLD}D${BLUE2}ata Collection ${RED}           #"
 echo -e "#${BLUE2}                              Script Version 0.1 ${RED}                            #"
 echo -e "#${BLUE}                                                                            ${RED} #"
-echo -e "#${BLUE2}                by Chris McMahon with contributions from Kyle Hoehn         ${RED} #"
+echo -e "#${BLUE2}                       by Chris McMahon and Kyle Hoehn                      ${RED} #"
 echo -e "#${BLUE}                                                                            ${RED} #"
 echo -e "###############################################################################"
 echo -e "${RESET}"
