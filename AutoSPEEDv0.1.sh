@@ -504,21 +504,8 @@ fi
 echo -e "[${BLUE}*${RESET}] Running EyeWitness Scan...\n"
 webhosts=${varOutPath}web-urls.txt
 if [ -f "$webhosts" ]; then
-    if [ -d "${varWorkingDir}/Tools/EyeWitness" ];then
-        if command -v eyewitness &> /dev/null
-        then
-            echo -e "[${GREEN}+${RESET}] EyeWitness is installed."
-        else
-            echo -e "[${RED}!${RESET}] Installing EyeWitness."
-            bash ${varWorkingDir}/Tools/EyeWitness/Python/setup/setup.sh &> /dev/null
-        fi
-    else
-        git clone https://github.com/RedSiege/EyeWitness.git ${varWorkingDir}/Tools/EyeWitness
-        bash ${varWorkingDir}/Tools/EyeWitness/Python/setup/setup.sh &> /dev/null
-        echo -e "[${GREEN}${BOLD}*${RESET}] ${BOLD}EyeWitness was not installed, so it has been downloaded and installed.${RESET}"
-    fi
     chmod 777 -R ${varWorkingDir}/${clientcode}
-    runuser -l agiopt -c "python3 -m pip install selenium==4.9.1; eyewitness -f ${webhosts} -d ${varWorkingDir}/${clientcode}/other/EyeWitness_output --no-prompt --threads 10 --delay 15"    
+    runuser -l agiopt -c "eyewitness -f ${webhosts} -d ${varWorkingDir}/${clientcode}/other/EyeWitness_output --no-prompt --threads 10 --delay 15"    
     echo -e "\n[${BLUE}*${RESET}] EyeWitness scan completed. Check other directory for results.\n"
 else 
     echo -e "[${RED}!${RESET}] ${webhosts} does not exist. Skipping web url scanning.\n"
